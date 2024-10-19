@@ -2,6 +2,15 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Form,
+} from "../components/ui/form";
+import { Input } from "../components/ui/input";
 
 // declare from kita sepeti apa menggunakan bantuan  typescript
 
@@ -20,11 +29,13 @@ const LoginFormSchemas = z.object({
 // infer mengambil bentuk loginFormSchemas, mmebuat sebuah object
 type LoginFormSchema = z.infer<typeof LoginFormSchemas>;
 
-const Form = () => {
+const Forms = () => {
   // lalu agar validation bekerja maka tambahkan resolver
-  const { register, handleSubmit, formState } = useForm<LoginFormSchema>({
+  const form = useForm<LoginFormSchema>({
     resolver: zodResolver(LoginFormSchemas),
   });
+
+  const { handleSubmit, control } = form;
 
   const OnSubmit = handleSubmit((values) => {
     alert(`Username : ${values.username} , Password : ${values.password}`);
@@ -36,55 +47,51 @@ const Form = () => {
         <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
           Login
         </h2>
-        <form>
-          <div className="mb-4 ">
-            <label
-              className="block text-gray-700 text-sm font-semibold mb-2"
-              htmlFor="username"
-            >
-              Username
-            </label>
-            <input
-              {...register("username")}
-              type="text"
-              id="username"
-              placeholder="Enter your username"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+
+        <Form {...form}>
+          <form onSubmit={OnSubmit}>
+            <FormField
+              control={control}
+              name="username"
+              // field seperti {... register }
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Username</FormLabel>
+                    <FormControl>
+                      <Input type="text" {...field} />
+                    </FormControl>
+                    {/* tidak perlu memanggil condisional rendering nya  */}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
-            {formState.errors?.username && (
-              <p className="text-red-600 text-sm">
-                {formState.errors?.username.message}
-              </p>
-            )}
-          </div>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-semibold mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <input
-              {...register("password")}
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
+            <FormField
+              control={control}
+              name="password"
+              // field seperti {... register }
+              render={({ field }) => {
+                return (
+                  <FormItem>
+                    <FormLabel>Password</FormLabel>
+                    <FormControl>
+                      <Input type="password" {...field} />
+                    </FormControl>
+                    {/* tidak perlu memanggil condisional rendering nya  */}
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
             />
-            {formState.errors?.password && (
-              <p className="text-red-600 text-sm">
-                {formState.errors?.password.message}
-              </p>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            onClick={OnSubmit}
-          >
-            Login
-          </button>
-        </form>
+            <button
+              type="submit"
+              className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+            >
+              Login
+            </button>
+          </form>
+        </Form>
         <p className="mt-4 text-center text-sm text-gray-600">
           By continuing, you agree to Amazon's Conditions of Use and Privacy
           Notice.
@@ -101,4 +108,4 @@ const Form = () => {
   );
 };
 
-export default Form;
+export default Forms;

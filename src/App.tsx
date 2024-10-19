@@ -1,10 +1,10 @@
-import Form from "./pages/Form";
+import Forms from "./pages/Forms";
 
 function App() {
   return (
     <>
       <div>
-        <Form />
+        <Forms />
       </div>
     </>
   );
