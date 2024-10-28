@@ -1,10 +1,8 @@
-import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 // declare from kita sepeti apa menggunakan bantuan  typescript
-
 const LoginFormSchemas = z.object({
   username: z
     .string()
@@ -15,7 +13,6 @@ const LoginFormSchemas = z.object({
     .min(3, "Password Minimal 3 Karakter")
     .max(16, "Password max 16 karakter"),
 });
-
 // buat bentuk form nya
 // infer mengambil bentuk loginFormSchemas, mmebuat sebuah object
 type LoginFormSchema = z.infer<typeof LoginFormSchemas>;
@@ -29,6 +26,8 @@ const Form = () => {
   const OnSubmit = handleSubmit((values) => {
     alert(`Username : ${values.username} , Password : ${values.password}`);
   });
+
+  console.log("result : ", OnSubmit);
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-200 to-gray-300">

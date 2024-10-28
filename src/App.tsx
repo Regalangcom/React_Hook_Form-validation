@@ -3,9 +3,7 @@ import Forms from "./pages/Forms";
 function App() {
   return (
     <>
-      <div>
-        <Forms />
-      </div>
+      <Forms />
     </>
   );
 }
