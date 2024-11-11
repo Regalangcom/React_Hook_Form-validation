@@ -1,9 +1,4 @@
-<<<<<<< HEAD
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-=======
 import { useForm, SubmitHandler } from "react-hook-form";
->>>>>>> formShcndnUi
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMultiStepForm } from "@eli/hooks/useMultiForm";
 import { LoginFormSchema } from "@eli/validation/FormValidation";
@@ -15,27 +10,6 @@ import { typeDataFrom } from "@eli/validation";
 import axios from "axios";
 import { useEffect, useState } from "react";
 
-<<<<<<< HEAD
-// declare from kita sepeti apa menggunakan bantuan  typescript
-const LoginFormSchemas = z.object({
-  username: z
-    .string()
-    .min(3, "Usename Minimal 3 Karakter")
-    .max(16, "Username max 16 karakter"),
-  password: z
-    .string()
-    .min(3, "Password Minimal 3 Karakter")
-    .max(16, "Password max 16 karakter"),
-});
-// buat bentuk form nya
-// infer mengambil bentuk loginFormSchemas, mmebuat sebuah object
-type LoginFormSchema = z.infer<typeof LoginFormSchemas>;
-
-const Form = () => {
-  // lalu agar validation bekerja maka tambahkan resolver
-  const { register, handleSubmit, formState } = useForm<LoginFormSchema>({
-    resolver: zodResolver(LoginFormSchemas),
-=======
 const Forms: React.FC = () => {
   const [csurf, setcsurf] = useState<string | null>(null);
   const defaultValues: typeDataFrom = {
@@ -56,7 +30,6 @@ const Forms: React.FC = () => {
   const form = useForm<typeDataFrom>({
     resolver: zodResolver(LoginFormSchema),
     defaultValues: defaultValues,
->>>>>>> formShcndnUi
   });
 
   const { control, handleSubmit, reset } = form;
@@ -111,7 +84,7 @@ const Forms: React.FC = () => {
     }
   };
 
-  console.log("result : ", OnSubmit);
+  console.log("result : ", onSubmit);
 
   return (
     <main className="flex  items-center justify-center min-h-screen bg-gray-100">

@@ -4,14 +4,10 @@ import Notfound from "@eli/pages/NotFound";
 function App() {
   return (
     <>
-<<<<<<< HEAD
-      <Forms />
-=======
       <Routes>
         <Route path="/" element={<Forms />} />
         <Route path="/NotFound" element={<Notfound />} />
       </Routes>
->>>>>>> formShcndnUi
     </>
   );
 }
