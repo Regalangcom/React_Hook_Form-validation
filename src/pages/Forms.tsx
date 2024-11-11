@@ -1,108 +1,118 @@
-import React from "react";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  Form,
-} from "../components/ui/form";
-import { Input } from "../components/ui/input";
+import { useMultiStepForm } from "@eli/hooks/useMultiForm";
+import { LoginFormSchema } from "@eli/validation/FormValidation";
+import FormEducation from "./Education";
+import InformationBankingForms from "@eli/pages/InformationBanking";
+import { Form } from "@eli/components/ui/form";
+import PersonalDataFrom from "@eli/pages/PersonalDataForm";
+import { typeDataFrom } from "@eli/validation";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
-// declare from kita sepeti apa menggunakan bantuan  typescript
+const Forms: React.FC = () => {
+  const [csurf, setcsurf] = useState<string | null>(null);
+  const defaultValues: typeDataFrom = {
+    id: 0,
+    username: "",
+    lastname: "",
+    age: 0,
+    address: "",
+    name_School: "",
+    address_School: "",
+    graduate_year: 0,
+    educational_level: "",
+    bank_name: "",
+    account_number: 0,
+    manufacturer_branch_address: "",
+  };
 
-const LoginFormSchemas = z.object({
-  username: z
-    .string()
-    .min(3, "Usename Minimal 3 Karakter")
-    .max(16, "Username max 16 karakter"),
-  password: z
-    .string()
-    .min(3, "Password Minimal 3 Karakter")
-    .max(16, "Password max 16 karakter"),
-});
-
-// buat bentuk form nya
-// infer mengambil bentuk loginFormSchemas, mmebuat sebuah object
-type LoginFormSchema = z.infer<typeof LoginFormSchemas>;
-
-const Forms = () => {
-  // lalu agar validation bekerja maka tambahkan resolver
-  const form = useForm<LoginFormSchema>({
-    resolver: zodResolver(LoginFormSchemas),
+  const form = useForm<typeDataFrom>({
+    resolver: zodResolver(LoginFormSchema),
+    defaultValues: defaultValues,
   });
 
-  const { handleSubmit, control } = form;
+  const { control, handleSubmit, reset } = form;
+  const { currentStep, isFirstStep, isLastStep, steps, step, Back, Next } =
+    useMultiStepForm([
+      <PersonalDataFrom control={control} />,
+      <FormEducation control={control} />,
+      <InformationBankingForms control={control} />,
+    ]);
 
-  const OnSubmit = handleSubmit((values) => {
-    alert(`Username : ${values.username} , Password : ${values.password}`);
-  });
+  useEffect(() => {
+    const axiosCsruf = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_LOCAL_HOST_SERVER}/api/v1/data/csrf-Token`,
+          { withCredentials: true }
+        );
+        setcsurf(response.data.csurfToken);
+      } catch (error) {
+        console.log("error data", error);
+      }
+    };
+    axiosCsruf();
+  }, []);
+
+  const onSubmit: SubmitHandler<typeDataFrom> = async (
+    values: typeDataFrom
+  ) => {
+    try {
+      const response = await axios.post<typeDataFrom>(
+        `${import.meta.env.VITE_LOCAL_HOST_SERVER}/api/v1/data/personalData`,
+        values,
+        {
+          headers: {
+            "X-CSRF-Token": csurf,
+          },
+          withCredentials: true,
+        }
+      );
+      reset();
+      console.log(response.data);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error occurred:", error.message); // Akses property `message`
+
+        if (axios.isAxiosError(error) && error.response?.status === 403) {
+          window.location.href = "http://localhost:5173/NotFound";
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-200 to-gray-300">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
-          Login
+    <main className="flex  items-center justify-center min-h-screen bg-gray-100">
+      <div className="p-6 rounded-lg shadow-2xl bg-gray-800 w-full max-w-md">
+        <h2 className="text-lg text-white  font-semibold text-start mb-4">
+          {currentStep + 1} / {steps.length}
         </h2>
-
         <Form {...form}>
-          <form onSubmit={OnSubmit}>
-            <FormField
-              control={control}
-              name="username"
-              // field seperti {... register }
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>Username</FormLabel>
-                    <FormControl>
-                      <Input type="text" {...field} />
-                    </FormControl>
-                    {/* tidak perlu memanggil condisional rendering nya  */}
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-            <FormField
-              control={control}
-              name="password"
-              // field seperti {... register }
-              render={({ field }) => {
-                return (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" {...field} />
-                    </FormControl>
-                    {/* tidak perlu memanggil condisional rendering nya  */}
-                    <FormMessage />
-                  </FormItem>
-                );
-              }}
-            />
-            <button
-              type="submit"
-              className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            >
-              Login
-            </button>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="">{step}</div>
+            <div className="flex justify-between mt-4">
+              {!isFirstStep && (
+                <button
+                  type="button"
+                  className="w-full bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition duration-200 mr-2"
+                  onClick={Back}
+                >
+                  Back
+                </button>
+              )}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                onClick={Next}
+              >
+                {isLastStep ? "Submit" : "Next"}
+              </button>
+            </div>
           </form>
         </Form>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          By continuing, you agree to Amazon's Conditions of Use and Privacy
-          Notice.
-        </p>
-        <hr className="my-6 border-gray-300" />
-        <p className="text-center text-sm text-gray-600">
-          New to Amazon?{" "}
-          <a href="#" className="text-blue-600 hover:underline">
-            Create your account
-          </a>
-        </p>
       </div>
     </main>
   );
