@@ -1,7 +1,21 @@
+<<<<<<< HEAD
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+=======
+import { useForm, SubmitHandler } from "react-hook-form";
+>>>>>>> formShcndnUi
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMultiStepForm } from "@eli/hooks/useMultiForm";
+import { LoginFormSchema } from "@eli/validation/FormValidation";
+import FormEducation from "./Education";
+import InformationBankingForms from "@eli/pages/InformationBanking";
+import { Form } from "@eli/components/ui/form";
+import PersonalDataFrom from "@eli/pages/PersonalDataForm";
+import { typeDataFrom } from "@eli/validation";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
+<<<<<<< HEAD
 // declare from kita sepeti apa menggunakan bantuan  typescript
 const LoginFormSchemas = z.object({
   username: z
@@ -21,83 +35,116 @@ const Form = () => {
   // lalu agar validation bekerja maka tambahkan resolver
   const { register, handleSubmit, formState } = useForm<LoginFormSchema>({
     resolver: zodResolver(LoginFormSchemas),
+=======
+const Forms: React.FC = () => {
+  const [csurf, setcsurf] = useState<string | null>(null);
+  const defaultValues: typeDataFrom = {
+    id: 0,
+    username: "",
+    lastname: "",
+    age: 0,
+    address: "",
+    name_School: "",
+    address_School: "",
+    graduate_year: 0,
+    educational_level: "",
+    bank_name: "",
+    account_number: 0,
+    manufacturer_branch_address: "",
+  };
+
+  const form = useForm<typeDataFrom>({
+    resolver: zodResolver(LoginFormSchema),
+    defaultValues: defaultValues,
+>>>>>>> formShcndnUi
   });
 
-  const OnSubmit = handleSubmit((values) => {
-    alert(`Username : ${values.username} , Password : ${values.password}`);
-  });
+  const { control, handleSubmit, reset } = form;
+  const { currentStep, isFirstStep, isLastStep, steps, step, Back, Next } =
+    useMultiStepForm([
+      <PersonalDataFrom control={control} />,
+      <FormEducation control={control} />,
+      <InformationBankingForms control={control} />,
+    ]);
+
+  useEffect(() => {
+    const axiosCsruf = async () => {
+      try {
+        const response = await axios.get(
+          `${import.meta.env.VITE_LOCAL_HOST_SERVER}/api/v1/data/csrf-Token`,
+          { withCredentials: true }
+        );
+        setcsurf(response.data.csurfToken);
+      } catch (error) {
+        console.log("error data", error);
+      }
+    };
+    axiosCsruf();
+  }, []);
+
+  const onSubmit: SubmitHandler<typeDataFrom> = async (
+    values: typeDataFrom
+  ) => {
+    try {
+      const response = await axios.post<typeDataFrom>(
+        `${import.meta.env.VITE_LOCAL_HOST_SERVER}/api/v1/data/personalData`,
+        values,
+        {
+          headers: {
+            "X-CSRF-Token": csurf,
+          },
+          withCredentials: true,
+        }
+      );
+      reset();
+      console.log(response.data);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error("Error occurred:", error.message); // Akses property `message`
+
+        if (axios.isAxiosError(error) && error.response?.status === 403) {
+          window.location.href = "http://localhost:5173/NotFound";
+        }
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
 
   console.log("result : ", OnSubmit);
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-200 to-gray-300">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
-        <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
-          Login
+    <main className="flex  items-center justify-center min-h-screen bg-gray-100">
+      <div className="p-6 rounded-lg shadow-2xl bg-gray-800 w-full max-w-md">
+        <h2 className="text-lg text-white  font-semibold text-start mb-4">
+          {currentStep + 1} / {steps.length}
         </h2>
-        <form>
-          <div className="mb-4 ">
-            <label
-              className="block text-gray-700 text-sm font-semibold mb-2"
-              htmlFor="username"
-            >
-              Username
-            </label>
-            <input
-              {...register("username")}
-              type="text"
-              id="username"
-              placeholder="Enter your username"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-            />
-            {formState.errors?.username && (
-              <p className="text-red-600 text-sm">
-                {formState.errors?.username.message}
-              </p>
-            )}
-          </div>
-          <div className="mb-6">
-            <label
-              className="block text-gray-700 text-sm font-semibold mb-2"
-              htmlFor="password"
-            >
-              Password
-            </label>
-            <input
-              {...register("password")}
-              type="password"
-              id="password"
-              placeholder="Enter your password"
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-            />
-            {formState.errors?.password && (
-              <p className="text-red-600 text-sm">
-                {formState.errors?.password.message}
-              </p>
-            )}
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
-            onClick={OnSubmit}
-          >
-            Login
-          </button>
-        </form>
-        <p className="mt-4 text-center text-sm text-gray-600">
-          By continuing, you agree to Amazon's Conditions of Use and Privacy
-          Notice.
-        </p>
-        <hr className="my-6 border-gray-300" />
-        <p className="text-center text-sm text-gray-600">
-          New to Amazon?{" "}
-          <a href="#" className="text-blue-600 hover:underline">
-            Create your account
-          </a>
-        </p>
+        <Form {...form}>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <div className="">{step}</div>
+            <div className="flex justify-between mt-4">
+              {!isFirstStep && (
+                <button
+                  type="button"
+                  className="w-full bg-red-600 text-white font-semibold py-2 rounded-lg hover:bg-red-700 transition duration-200 mr-2"
+                  onClick={Back}
+                >
+                  Back
+                </button>
+              )}
+              <button
+                type="submit"
+                className="w-full bg-blue-600 text-white font-semibold py-2 rounded-lg hover:bg-blue-700 transition duration-200"
+                onClick={Next}
+              >
+                {isLastStep ? "Submit" : "Next"}
+              </button>
+            </div>
+          </form>
+        </Form>
       </div>
     </main>
   );
 };
 
-export default Form;
+export default Forms;
